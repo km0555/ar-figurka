@@ -1,58 +1,37 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>AR</title>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
-</head>
-<body style="margin:0;overflow:hidden;">
-  <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;" renderer="logarithmicDepthBuffer: true;">
-    <a-assets>
-      <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
-    </a-assets>
+  <head>
+    <meta charset="utf-8">
+    <title>AR</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  </head>
+  <body style="margin:0;overflow:hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" renderer="logarithmicDepthBuffer: true;">
+      <a-assets>
+        <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
+      </a-assets>
 
 
-    <a-marker id="marker" type="pattern" url="pattern-qr-code.patt">
+      <a-marker id="marker" type="pattern" url="pattern-qr-code.patt" emitevents="true">
+        <a-entity id="dog" 
+          gltf-model="#dogModel"
+          scale="3 3 3"
+          position="0 -0.5 -1"
+          rotation="0 180 0"
+          animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;">
+        </a-entity>
+      </a-marker>
 
-      <a-entity id="dog-temp" gltf-model="#dogModel" scale="3 3 3" position="0 -0.5 -1" rotation="0 180 0" visible="true"></a-entity>
-    </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
 
+    <script>
+      const marker = document.querySelector('#marker');
 
-    <a-entity id="dog" gltf-model="#dogModel" scale="3 3 3" rotation="0 180 0" visible="false"
-              animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;"></a-entity>
-
-    <a-entity camera></a-entity>
-  </a-scene>
-
-  <script>
-    const marker = document.querySelector('#marker');
-    const dogTemp = document.querySelector('#dog-temp');
-    const dog = document.querySelector('#dog');
-    let appeared = false;
-
-    marker.addEventListener('markerFound', () => {
-      if (!appeared) {
-
-        const localPos = dogTemp.object3D.position.clone();
-        const localRot = dogTemp.object3D.rotation.clone();
-
-
-        const worldPos = new THREE.Vector3();
-        marker.object3D.localToWorld(localPos);
-        worldPos.copy(localPos);
-
-
-        dog.object3D.position.copy(worldPos);
-        dog.object3D.rotation.copy(localRot);
-        dog.setAttribute('visible', 'true');
-
-
-        dogTemp.setAttribute('visible', 'false');
-
-        appeared = true;
-      }
-    });
-  </script>
-</body>
+      marker.addEventListener('markerLost', () => {
+        marker.object3D.visible = true;
+      });
+    </script>
+  </body>
 </html>

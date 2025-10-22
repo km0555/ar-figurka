@@ -1,63 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <title>AR Chihuahua без маркера</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      xrweb="arMode: true"
-      renderer="logarithmicDepthBuffer: true;"
-    >
-      <a-assets>
-        <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
-      </a-assets>
+<head>
+  <meta charset="UTF-8">
+  <title>AR Chihuahua имитация поверхности с камерой</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <a-scene embedded shadow="type: pcfsoft">
+    <a-assets>
+      <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
+    </a-assets>
 
-      <!-- Собака -->
-      <a-entity
-        id="dog"
-        gltf-model="#dogModel"
-        scale="0.05 0.05 0.05"
-        rotation="0 180 0"
-        visible="false"
-      ></a-entity>
+    <!-- Камера с видео фоном -->
+    <a-entity id="camera" camera position="0 1.6 3"></a-entity>
 
-      <!-- Камера -->
-      <a-entity camera look-controls></a-entity>
+    <!-- Видео с камеры -->
+    <a-entity id="video-plane"></a-entity>
 
-      <a-entity id="cursor" cursor="fuse: false" raycaster="objects: .clickable"></a-entity>
-    </a-scene>
+    <!-- Имитация пола -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#777" shadow></a-plane>
 
-    <script>
-      const sceneEl = document.querySelector('a-scene');
-      const dogEl = document.querySelector('#dog');
+    <!-- Собака -->
+    <a-entity
+      id="dog"
+      gltf-model="#dogModel"
+      scale="0.05 0.05 0.05"
+      position="0 -0.5 -2"
+      rotation="0 180 0"
+      shadow="cast: true; receive: false"
+      animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear"
+    ></a-entity>
 
-      // Проверяем поддержку WebXR
-      if (navigator.xr) {
-        navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: document.body } })
-          .then(session => {
-            sceneEl.xrSession = session;
+    <!-- Свет для тени -->
+    <a-entity light="type: directional; intensity: 1; castShadow: true" position="2 4 2"></a-entity>
+  </a-scene>
 
-            const viewerSpace = session.requestReferenceSpace('viewer');
-            const hitTestSourcePromise = session.requestReferenceSpace('viewer').then(refSpace => session.requestHitTestSource({ space: refSpace }));
+  <script>
+    // Подключаем камеру как текстуру для плоскости фона
+    async function initCamera() {
+      const video = document.createElement('video');
+      video.autoplay = true;
+      video.playsInline = true;
 
-            session.addEventListener('select', async (event) => {
-              const frame = event.frame;
-              const hitTestResults = frame.getHitTestResults(await hitTestSourcePromise);
-              if (hitTestResults.length > 0) {
-                const hit = hitTestResults[0];
-                const pose = hit.getPose(sceneEl.renderer.xr.getReferenceSpace());
-                dogEl.setAttribute('position', `${pose.transform.position.x} ${pose.transform.position.y} ${pose.transform.position.z}`);
-                dogEl.setAttribute('visible', 'true');
-              }
-            });
-          });
-      } else {
-        alert('Ваш браузер не поддерживает WebXR AR.');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        video.srcObject = stream;
+
+        const videoPlane = document.querySelector('#video-plane');
+        videoPlane.setAttribute('geometry', { primitive: 'plane', width: 16, height: 9 });
+        videoPlane.setAttribute('material', { shader: 'flat', src: video });
+        videoPlane.setAttribute('position', '0 4 -10'); // чуть позади сцены
+        videoPlane.setAttribute('rotation', '-10 0 0');
+      } catch (err) {
+        alert('Не удалось получить доступ к камере: ' + err);
       }
-    </script>
-  </body>
+    }
+
+    initCamera();
+  </script>
+</body>
 </html>

@@ -18,7 +18,8 @@
       <a-entity id="dog-temp" gltf-model="#dogModel" scale="3 3 3" position="0 -0.5 -1" rotation="0 180 0" visible="true"></a-entity>
     </a-marker>
 
-    <a-entity id="dog" gltf-model="#dogModel" scale="3 3 3" rotation="0 180 0" visible="false" 
+
+    <a-entity id="dog" gltf-model="#dogModel" scale="3 3 3" rotation="0 180 0" visible="false"
               animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;"></a-entity>
 
     <a-entity camera></a-entity>
@@ -33,13 +34,17 @@
     marker.addEventListener('markerFound', () => {
       if (!appeared) {
 
-        const pos = dogTemp.object3D.position.clone();
-        const rot = dogTemp.object3D.rotation.clone();
+        const localPos = dogTemp.object3D.position.clone();
+        const localRot = dogTemp.object3D.rotation.clone();
 
 
-        dog.object3D.position.copy(marker.object3D.localToWorld(pos));
-        dog.object3D.rotation.copy(marker.object3D.rotation);
+        const worldPos = new THREE.Vector3();
+        marker.object3D.localToWorld(localPos);
+        worldPos.copy(localPos);
 
+
+        dog.object3D.position.copy(worldPos);
+        dog.object3D.rotation.copy(localRot);
         dog.setAttribute('visible', 'true');
 
 

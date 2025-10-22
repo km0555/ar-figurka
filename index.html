@@ -16,25 +16,43 @@
       arjs="sourceType: webcam; debugUIEnabled: false;"
       renderer="logarithmicDepthBuffer: true;"
     >
-
+      <!-- Предзагрузка модели -->
       <a-assets>
         <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
       </a-assets>
 
-
+      <!-- Маркер (например, Hiro или кастомный QR-паттерн) -->
       <a-marker type="pattern" url="pattern-qr-code.patt">
-
+        <!-- Собака -->
         <a-entity
+          id="dog"
           gltf-model="#dogModel"
           scale="3 3 3"
           position="0 -0.5 -1"
           rotation="0 180 0"
           animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;"
+          visible="false"
         ></a-entity>
       </a-marker>
 
       <!-- Камера -->
       <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+      const dog = document.querySelector('#dog');
+      const marker = document.querySelector('a-marker');
+
+      marker.addEventListener('markerFound', () => {
+        // Показываем собаку и делаем полностью видимой
+        dog.setAttribute('visible', 'true');
+        dog.setAttribute('opacity', '1');
+      });
+
+      marker.addEventListener('markerLost', () => {
+        // Собака остаётся на последней позиции, делаем её немного прозрачной
+        dog.setAttribute('opacity', '0.7');
+      });
+    </script>
   </body>
 </html>

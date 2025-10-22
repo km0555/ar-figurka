@@ -1,50 +1,39 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <title>AR</title>
+  <head>
+    <meta charset="utf-8">
+    <title>AR</title>
 
-  <!-- A-Frame и AR.js -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
-</head>
+    <!-- A-Frame и AR.js -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  </head>
 
-<body style="margin: 0; overflow: hidden;">
-  <a-scene
-    vr-mode-ui="enabled: false"
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false;"
-    renderer="logarithmicDepthBuffer: true"
-  >
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      renderer="logarithmicDepthBuffer: true;"
+    >
 
-    <a-assets>
-      <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
-      <img id="backgroundImage" src="background.png">
-    </a-assets>
+      <a-assets>
+        <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
+      </a-assets>
+      
+      <a-marker type="pattern" url="pattern-qr-code.patt">
+        
+        <a-entity
+          gltf-model="#dogModel"
+          scale="3 3 3"
+          position="0 -0.5 -1"
+          rotation="0 180 0"
+          animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;"
+        ></a-entity>
+      </a-marker>
 
-
-    <a-sky src="#backgroundImage" rotation="0 0 0"></a-sky>
-
-
-    <a-marker type="pattern" url="pattern-qr-code.patt">
-      <a-entity
-        gltf-model="#dogModel"
-        scale="3 3 3"
-        position="0 -0.5 -1"
-        rotation="0 180 0"
-        animation="property: rotation; to: 0 540 0; loop: true; dur: 8000; easing: linear;"
-      ></a-entity>
-    </a-marker>
-
-
-    <a-entity id="ar-text" position="0 2 -2"
-      text="value: AR; align: center; color: #00ffff; width: 4; font: https://cdn.aframe.io/fonts/mozillavr.fnt;"
-      animation="property: position; dir: alternate; dur: 2000; loop: true; to: 0 2.3 -2"
-      material="shader: standard; emissive: #00ffff; emissiveIntensity: 0.5">
-    </a-entity>
-
-
-    <a-entity camera></a-entity>
-  </a-scene>
-</body>
+      <!-- Камера -->
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
 </html>

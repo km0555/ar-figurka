@@ -1,34 +1,63 @@
 <!DOCTYPE html>
 <html lang="ru">
   <head>
-    <meta charset="utf-8">
-    <title>AR Dog on Marker</title>
-
+    <meta charset="utf-8" />
+    <title>AR Chihuahua без маркера</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
   </head>
-
   <body style="margin: 0; overflow: hidden;">
     <a-scene
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
       vr-mode-ui="enabled: false"
+      embedded
+      xrweb="arMode: true"
+      renderer="logarithmicDepthBuffer: true;"
     >
       <a-assets>
         <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
       </a-assets>
 
-      <!-- Маркер (можно заменить на свой QR-код или NFT-маркер) -->
-      <a-marker preset="hiro">
-        <a-entity
-          gltf-model="#dogModel"
-          scale="0.05 0.05 0.05"
-          position="0 0 0"
-          rotation="0 180 0"
-        ></a-entity>
-      </a-marker>
+      <!-- Собака -->
+      <a-entity
+        id="dog"
+        gltf-model="#dogModel"
+        scale="0.05 0.05 0.05"
+        rotation="0 180 0"
+        visible="false"
+      ></a-entity>
 
-      <a-entity camera></a-entity>
+      <!-- Камера -->
+      <a-entity camera look-controls></a-entity>
+
+      <a-entity id="cursor" cursor="fuse: false" raycaster="objects: .clickable"></a-entity>
     </a-scene>
+
+    <script>
+      const sceneEl = document.querySelector('a-scene');
+      const dogEl = document.querySelector('#dog');
+
+      // Проверяем поддержку WebXR
+      if (navigator.xr) {
+        navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: document.body } })
+          .then(session => {
+            sceneEl.xrSession = session;
+
+            const viewerSpace = session.requestReferenceSpace('viewer');
+            const hitTestSourcePromise = session.requestReferenceSpace('viewer').then(refSpace => session.requestHitTestSource({ space: refSpace }));
+
+            session.addEventListener('select', async (event) => {
+              const frame = event.frame;
+              const hitTestResults = frame.getHitTestResults(await hitTestSourcePromise);
+              if (hitTestResults.length > 0) {
+                const hit = hitTestResults[0];
+                const pose = hit.getPose(sceneEl.renderer.xr.getReferenceSpace());
+                dogEl.setAttribute('position', `${pose.transform.position.x} ${pose.transform.position.y} ${pose.transform.position.z}`);
+                dogEl.setAttribute('visible', 'true');
+              }
+            });
+          });
+      } else {
+        alert('Ваш браузер не поддерживает WebXR AR.');
+      }
+    </script>
   </body>
 </html>

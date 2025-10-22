@@ -2,35 +2,31 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8">
-    <title>AR Chihuahua Fixed</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <title>AR Chihuahua</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
   </head>
   <body style="margin: 0; overflow: hidden;">
     <a-scene
-      embedded
       vr-mode-ui="enabled: false"
+      embedded
       arjs="sourceType: webcam; debugUIEnabled: false;"
       renderer="logarithmicDepthBuffer: true;"
     >
-      <a-entity id="modelHolder" position="0 0 0"></a-entity>
+      <a-assets>
+        <a-asset-item id="dogModel" src="chihuahua_derp_dog.glb"></a-asset-item>
+      </a-assets>
+
+      <!-- Фигурка -->
+      <a-entity 
+        gltf-model="#dogModel"
+        scale="100 100 100"
+        position="0 0 -1"
+        rotation="0 180 0"
+      ></a-entity>
+
+      <!-- Камера -->
       <a-entity camera></a-entity>
     </a-scene>
-
-    <script>
-      window.addEventListener('arjs-video-loaded', function () {
-        console.log('✅ Камера готова, загружаем модель...');
-        setTimeout(() => {
-          const scene = document.querySelector('a-scene');
-          const modelHolder = document.querySelector('#modelHolder');
-          const model = document.createElement('a-entity');
-          model.setAttribute('gltf-model', 'url(chihuahua_derp_dog.glb)');
-          model.setAttribute('scale', '3 3 3');
-          model.setAttribute('rotation', '0 180 0');
-          modelHolder.appendChild(model);
-          console.log('🐶 Модель добавлена после загрузки камеры');
-        }, 500); // полсекунды задержки
-      });
-    </script>
   </body>
 </html>
